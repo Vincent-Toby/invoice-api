@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              Int      @id @default(autoincrement())
+  email           String   @unique
+  password        String
+  name            String
+  businessName    String
+  businessAddress String
+  businessPhone   String
+  items           Item[]
+  customers       Customer[]
+  terms           TermsAndConditions[]
+  invoices        Invoice[]
+  createdAt       DateTime @default(now())
+}
+
+model Item {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Int
+  createdAt   DateTime @default(now())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  invoiceItems InvoiceItem[]
+}
+
+model Customer {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  phone       String
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  invoices    Invoice[]
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, email])
+}
+
+model TermsAndConditions {
+  id          Int      @id @default(autoincrement())
+  title       String
+  body        String
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Invoice {
+  id               Int      @id @default(autoincrement())
+  publicId         String   @unique @default(cuid())
+  invoiceNumber    String
+  title            String
+  dueDate          DateTime
+  isRecurring      Boolean   @default(false)
+  tax              Float    @default(0)
+  discountName     String?
+  discountType     String?
+  discountAmount   Int?
+  discountDeadline DateTime?
+  termsText        String?
+  subtotal         Int
+  totalAmount      Int
+  status           String   @default("draft")
+  customerId       Int
+  customer         Customer @relation(fields: [customerId], references: [id])
+  userId           Int
+  user             User     @relation(fields: [userId], references: [id])
+  items            InvoiceItem[]
+  createdAt        DateTime @default(now())
+}
+
+model InvoiceItem {
+  id          Int      @id @default(autoincrement())
+  invoiceId   Int
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+  itemId      Int?
+  item        Item?    @relation(fields: [itemId], references: [id])
+  name        String
+  unitPrice   Int
+  quantity    Int
+  createdAt   DateTime @default(now())
+}
