@@ -681,6 +681,4 @@ app.get("/protected", authenticate, (req, res) => {
   res.json({ message: "You are Protected!", userId: req.userId });
 });
 
-app.listen(5000, () => {
-  console.log("Server is running on port 5000");
-});
+module.exports = app;
